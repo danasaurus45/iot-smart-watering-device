@@ -3,6 +3,7 @@
 #include <PubSubClient.h>
 #include <SimpleDHT.h>
 
+#define MOTOR D5
 #define LED D6 //led
 
 #define sensorSoil A0 //pin sensor LDR
@@ -32,6 +33,16 @@ void ledON()
 void ledOFF()
 {
   digitalWrite(LED, HIGH);
+}
+
+void pumpON()
+{
+  digitalWrite(MOTOR, HIGH);
+}
+
+void pumpOFF()
+{
+  digitalWrite(MOTOR, LOW);
 }
 
 void setup_wifi()
@@ -84,12 +95,12 @@ void callback(char *topic, byte *payload, unsigned int length)
     Serial.print("Changing Water pump to ");
     if (messageTemp == "on")
     {
-      ledON();
+      pumpON();
       Serial.print("On");
     }
     else if (messageTemp == "off")
     {
-      ledOFF();
+      pumpOFF();
       Serial.print("Off");
     }
   }
@@ -168,7 +179,15 @@ void loop()
     Serial.println(humidityTemp);
     Serial.print("Soil Moisture = ");
     Serial.println(soilTemp);
-
+    if (soilVal >= 600)
+    {
+      pumpON();
+      delay(5000);
+    }
+    else
+    {
+      pumpOFF();
+    }
     client.publish("room/suhu", temperatureTemp);
     client.publish("room/humidity", humidityTemp);
     client.publish("room/soil", soilTemp);
